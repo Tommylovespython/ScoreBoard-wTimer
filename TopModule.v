@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // school: CSUF
 // Engineers: Jeremy, Duy, Spencer
@@ -39,7 +38,7 @@ module Seven_segment_LED_Display_Controller(
     reg [5:0] minutes;   // mm:00
 
     clock_divider DUT (.clk(clock),.reset(reset), .sclk(slow_clock)); // instantiating here
-
+    
     always @(posedge clock or negedge reset)
     begin
         if(reset==0) // when switch is down 
@@ -54,6 +53,24 @@ module Seven_segment_LED_Display_Controller(
         end
     end 
     assign one_second_enable = (one_second_counter==99999999)?1:0;
+    
+    always @(posedge clock)
+    begin
+    if (reset_score) begin //reset score here
+        minutes <= 12; // mm is set to 12:00
+        seconds <= 00;//default to 12:00 min once enabled
+    end                         
+    else if (one_second_enable == 1) // starts one second counter for timer 
+        seconds <= seconds - 1;//decrement clock
+    else if (seconds == 0) begin    //when clock == 0
+        seconds <= 59;         //set value to 59
+        minutes <= minutes - 1;//decrement mm only if sec == 0
+    end 
+    else if (pause) //pause clock
+        seconds=seconds; // pause occurs because p = p
+    else if (minutes ==0) //reset MM:00 to 11 for wrap
+        minutes <= 11;         
+    end
     
     always @(posedge clock)
     begin
@@ -190,4 +207,4 @@ begin
         if(team_2 >= 7'b1100100)//reset score board at 100
             team_2 = 7'b0000000;//back to zero
     end
-endmodule
+endmodule //end module here
